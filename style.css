@@ -58,12 +58,40 @@ header h1 {
     text-align: center;
 }
 
+.lcd-display-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.display-controls-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 100px;
+}
+
+.display-controls-left button {
+    padding: 8px 12px;
+    background-color: #9b59b6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.display-controls-left button:hover {
+    background-color: #8e44ad;
+}
+
 .lcd-display {
     background-color: #2c3e50;
     border: 3px solid #1a2530;
     border-radius: 8px;
     padding: 15px;
-    margin: 0 auto;
+    flex: 1;
     max-width: 800px;
 }
 
@@ -119,6 +147,59 @@ header h1 {
 
 .cell-grid .grid-pixel.active {
     background-color: #2980b9;
+}
+
+.display-controls-right {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 150px;
+}
+
+.animation-controls-simple .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.animation-controls-simple label {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.animation-controls-simple #animation-speed {
+    width: 100%;
+}
+
+.animation-controls-simple #speed-value {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 14px;
+    text-align: center;
+}
+
+.animation-controls-simple #animation-direction {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.animation-controls-simple #apply-animation-checkbox {
+    transform: scale(1.2);
+    margin-right: 5px;
+}
+
+.animation-controls-simple .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.animation-controls-simple button {
+    padding: 6px 10px;
+    font-size: 14px;
+    min-width: auto;
 }
 
 .display-info {
@@ -321,6 +402,43 @@ button:hover {
     margin-bottom: 10px;
 }
 
+.animation-options {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+}
+
+.animation-options label {
+    cursor: pointer;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.animation-settings {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #d5dbdb;
+    border-radius: 4px;
+}
+
+.animation-settings .control-group {
+    margin-bottom: 10px;
+}
+
+.animation-settings label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+.animation-settings input, .animation-settings select {
+    width: 100%;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
 .code-output {
     display: flex;
     flex-direction: column;
@@ -359,6 +477,17 @@ footer a:hover {
 @media (max-width: 768px) {
     .editor-section {
         flex-direction: column;
+    }
+    
+    .lcd-display-container {
+        flex-direction: column;
+    }
+    
+    .display-controls-left,
+    .display-controls-right {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
     }
     
     .lcd-display {

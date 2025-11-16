@@ -6,13 +6,27 @@ let currentGrid = Array(8).fill().map(() => Array(5).fill(false));
 let isMouseDown = false;
 let isDragging = false;
 let currentToggleState = false;
+let copiedCellData = null; // For cell copy/paste functionality
+let animationInterval = null; // For animation control
+let isAnimationPlaying = false; // Animation state
 
 // DOM Elements
 const characterGrid = document.getElementById('character-grid');
 const clearBtn = document.getElementById('clear-btn');
 const resetDisplayBtn = document.getElementById('reset-display-btn');
+const copyCellBtn = document.getElementById('copy-cell-btn');
+const pasteCellBtn = document.getElementById('paste-cell-btn');
 const transmissionOptions = document.getElementsByName('transmission');
 const formatOptions = document.getElementsByName('format');
+const scrollingCheckbox = document.getElementById('scrolling-checkbox');
+const animationSpeed = document.getElementById('animation-speed');
+const codeAnimationSpeed = document.getElementById('code-animation-speed');
+const speedValue = document.getElementById('speed-value');
+const animationDirection = document.getElementById('animation-direction');
+const codeAnimationDirection = document.getElementById('code-animation-direction');
+const applyAnimationCheckbox = document.getElementById('apply-animation-checkbox');
+const playAnimationBtn = document.getElementById('play-animation-btn');
+const stopAnimationBtn = document.getElementById('stop-animation-btn');
 const codeOutput = document.getElementById('code-output');
 const copyCodeBtn = document.getElementById('copy-code-btn');
 const currentRowSpan = document.getElementById('current-row');
@@ -30,7 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners
     clearBtn.addEventListener('click', clearEditor);
     resetDisplayBtn.addEventListener('click', resetDisplay);
+    copyCellBtn.addEventListener('click', copyCell);
+    pasteCellBtn.addEventListener('click', pasteCell);
     copyCodeBtn.addEventListener('click', copyCodeToClipboard);
+    playAnimationBtn.addEventListener('click', playAnimation);
+    stopAnimationBtn.addEventListener('click', stopAnimation);
     
     // Transmission option change
     transmissionOptions.forEach(option => {
@@ -40,6 +58,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // Format option change
     formatOptions.forEach(option => {
         option.addEventListener('change', generateCode);
+    });
+    
+    // Scrolling checkbox change - synchronize with apply animation checkbox
+    scrollingCheckbox.addEventListener('change', function() {
+        applyAnimationCheckbox.checked = scrollingCheckbox.checked;
+        generateCode();
+    });
+    
+    // Apply animation checkbox change - synchronize with scrolling checkbox
+    applyAnimationCheckbox.addEventListener('change', function() {
+        scrollingCheckbox.checked = applyAnimationCheckbox.checked;
+        generateCode();
+    });
+    
+    // Animation controls synchronization
+    animationSpeed.addEventListener('input', function() {
+        updateSpeedValue();
+        syncAnimationSpeed();
+        if (isAnimationPlaying) {
+            // Restart animation with new speed
+            stopAnimation();
+            playAnimation();
+        }
+    });
+    
+    codeAnimationSpeed.addEventListener('input', function() {
+        syncAnimationSpeedFromCode();
+        if (isAnimationPlaying) {
+            // Restart animation with new speed
+            stopAnimation();
+            playAnimation();
+        }
+    });
+    
+    animationDirection.addEventListener('change', function() {
+        syncAnimationDirection();
+        if (isAnimationPlaying) {
+            // Restart animation with new direction
+            stopAnimation();
+            playAnimation();
+        }
+    });
+    
+    codeAnimationDirection.addEventListener('change', function() {
+        syncAnimationDirectionFromCode();
+        if (isAnimationPlaying) {
+            // Restart animation with new direction
+            stopAnimation();
+            playAnimation();
+        }
     });
     
     // Prevent dragging images
@@ -224,6 +292,32 @@ function resetDisplay() {
     generateCode();
 }
 
+// Copy the current cell
+function copyCell() {
+    // Create a deep copy of the current cell data
+    copiedCellData = JSON.parse(JSON.stringify(currentGrid));
+    console.log("Cell copied");
+}
+
+// Paste the copied cell data to the current cell
+function pasteCell() {
+    if (copiedCellData) {
+        // Copy the cell data to the current grid
+        currentGrid = JSON.parse(JSON.stringify(copiedCellData));
+        
+        // Update the editor display
+        updateEditorDisplay();
+        updateActiveCount();
+        
+        // Auto-save and generate code
+        autoSaveAndGenerate();
+        
+        console.log("Cell pasted");
+    } else {
+        console.log("No cell data to paste");
+    }
+}
+
 // Auto-save and generate code
 function autoSaveAndGenerate() {
     // Auto-save to current display cell
@@ -251,12 +345,134 @@ function updateDisplayCell(row, col) {
             cellGrid.appendChild(pixel);
         }
     }
+    
+    // If animation is playing, update the animation display as well
+    if (isAnimationPlaying) {
+        // The animation will automatically pick up the changes on its next cycle
+    }
+}
+
+// Update speed value display
+function updateSpeedValue() {
+    speedValue.textContent = `${animationSpeed.value}ms`;
+}
+
+// Synchronize animation speed between top and bottom controls
+function syncAnimationSpeed() {
+    const speed = animationSpeed.value;
+    codeAnimationSpeed.value = speed;
+    speedValue.textContent = `${speed}ms`;
+    generateCode(); // Regenerate code when speed changes
+}
+
+// Synchronize animation speed from code section to top controls
+function syncAnimationSpeedFromCode() {
+    const speed = codeAnimationSpeed.value;
+    animationSpeed.value = speed;
+    speedValue.textContent = `${speed}ms`;
+    generateCode(); // Regenerate code when speed changes
+}
+
+// Synchronize animation direction between top and bottom controls
+function syncAnimationDirection() {
+    const direction = animationDirection.value;
+    codeAnimationDirection.value = direction;
+    generateCode(); // Regenerate code when direction changes
+}
+
+// Synchronize animation direction from code section to top controls
+function syncAnimationDirectionFromCode() {
+    const direction = codeAnimationDirection.value;
+    animationDirection.value = direction;
+    generateCode(); // Regenerate code when direction changes
+}
+
+// Play animation
+function playAnimation() {
+    if (isAnimationPlaying) return;
+    
+    isAnimationPlaying = true;
+    const speed = parseInt(animationSpeed.value);
+    const direction = animationDirection.value; // Get current direction
+    
+    // Stop any existing animation
+    if (animationInterval) {
+        clearInterval(animationInterval);
+    }
+    
+    // Start new animation
+    let frame = 0;
+    animationInterval = setInterval(() => {
+        // Update display with animation effect
+        animateDisplay(frame, direction);
+        frame++;
+        if (frame > 1000) frame = 0; // Prevent overflow
+    }, speed);
+}
+
+// Stop animation
+function stopAnimation() {
+    isAnimationPlaying = false;
+    if (animationInterval) {
+        clearInterval(animationInterval);
+        animationInterval = null;
+    }
+    
+    // Reset display to normal state
+    for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 16; col++) {
+            updateDisplayCell(row, col);
+        }
+    }
+}
+
+// Animate display
+function animateDisplay(frame, direction) {
+    // Animation effect based on direction
+    for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 16; col++) {
+            const cellGrid = document.getElementById(`cell-grid-${row}-${col}`);
+            if (!cellGrid) continue;
+            
+            // Calculate shifted position based on direction and frame
+            let shift;
+            if (direction === 'left') {
+                // For left scrolling: characters move right to left
+                shift = (col + frame) % 16;
+            } else {
+                // For right scrolling: characters move left to right
+                shift = (col - frame) % 16;
+                if (shift < 0) {
+                    shift += 16;
+                }
+            }
+            
+            const shiftedCellData = displayGrid[row][shift];
+            
+            // Update cell display with shifted data
+            cellGrid.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const pixel = document.createElement('div');
+                    pixel.className = 'grid-pixel';
+                    if (shiftedCellData[r][c]) {
+                        pixel.classList.add('active');
+                    }
+                    cellGrid.appendChild(pixel);
+                }
+            }
+        }
+    }
 }
 
 // Generate Arduino code
 function generateCode() {
     const isI2C = document.querySelector('input[name="transmission"]:checked').value === 'i2c';
     const format = document.querySelector('input[name="format"]:checked').value;
+    const generateScrolling = scrollingCheckbox.checked;
+    const applyAnimation = applyAnimationCheckbox.checked;
+    const animationDir = codeAnimationDirection.value; // This should be correct
+    const animationSpeedValue = parseInt(codeAnimationSpeed.value);
     
     let code = '';
     
@@ -286,8 +502,9 @@ function generateCode() {
     // Collect all unique characters from the display
     let uniqueChars = [];
     let charMap = {}; // Map display positions to character indices
-    let charPositions = []; // Track which characters are at which positions
+    let displayContent = Array(2).fill().map(() => Array(16).fill(null)); // Track what's in each cell
     
+    // Process the entire display to track both characters and empty spaces
     for (let row = 0; row < 2; row++) {
         for (let col = 0; col < 16; col++) {
             const cellData = displayGrid[row][col];
@@ -311,12 +528,9 @@ function generateCode() {
                     uniqueChars.push(cellData);
                 }
                 
-                charPositions.push({
-                    row: row,
-                    col: col,
-                    charIndex: charMap[charString]
-                });
+                displayContent[row][col] = charMap[charString];
             }
+            // Empty cells are left as null
         }
     }
     
@@ -365,18 +579,113 @@ function generateCode() {
     }
     
     code += '}\n\n';
-    code += 'void loop() {\n';
-    code += '  lcd.clear();\n';
     
-    // Display the content using setCursor for each character
-    for (let i = 0; i < charPositions.length; i++) {
-        const pos = charPositions[i];
-        code += `  lcd.setCursor(${pos.col}, ${pos.row});\n`;
-        code += `  lcd.write(byte(${pos.charIndex}));\n`;
+    if (generateScrolling && applyAnimation) {
+        // Generate continuous scrolling animation code with direction and speed
+        code += 'void loop() {\n';
+        code += '  // Continuous scrolling text animation\n';
+        code += '  static int offset = 0;\n';
+        code += '  lcd.clear();\n';
+        code += '  \n';
+        
+        // Process each row for continuous scrolling
+        for (let row = 0; row < 2; row++) {
+            code += `  // Display content for line ${row + 1}\n`;
+            // Create an array of character positions for this line
+            let charPositions = [];
+            for (let col = 0; col < 16; col++) {
+                if (displayContent[row][col] !== null) {
+                    charPositions.push({
+                        position: col,
+                        charIndex: displayContent[row][col]
+                    });
+                }
+            }
+            
+            if (charPositions.length > 0) {
+                code += `  // Line ${row + 1} characters\n`;
+                for (let i = 0; i < charPositions.length; i++) {
+                    const charInfo = charPositions[i];
+                    code += `  {\n`;
+                    if (animationDir === 'left') {
+                        code += `    int pos = (${charInfo.position} - offset) % 16;\n`;
+                    } else {
+                        code += `    int pos = (${charInfo.position} + offset) % 16;\n`;
+                    }
+                    code += `    if (pos < 0) pos += 16;\n`;
+                    code += `    lcd.setCursor(pos, ${row});\n`;
+                    code += `    lcd.write(byte(${charInfo.charIndex}));\n`;
+                    code += `  }\n`;
+                }
+                code += `  \n`;
+            }
+        }
+        
+        code += '  offset++;\n';
+        code += '  if (offset >= 16) offset = 0; // Reset for continuous loop\n';
+        code += `  delay(${animationSpeedValue}); // Animation speed\n`;
+        code += '}\n';
+    } else if (generateScrolling) {
+        // Generate continuous scrolling animation code (default direction and speed)
+        code += 'void loop() {\n';
+        code += '  // Continuous scrolling text animation\n';
+        code += '  static int offset = 0;\n';
+        code += '  lcd.clear();\n';
+        code += '  \n';
+        
+        // Process each row for continuous scrolling
+        for (let row = 0; row < 2; row++) {
+            code += `  // Display content for line ${row + 1}\n`;
+            // Create an array of character positions for this line
+            let charPositions = [];
+            for (let col = 0; col < 16; col++) {
+                if (displayContent[row][col] !== null) {
+                    charPositions.push({
+                        position: col,
+                        charIndex: displayContent[row][col]
+                    });
+                }
+            }
+            
+            if (charPositions.length > 0) {
+                code += `  // Line ${row + 1} characters\n`;
+                for (let i = 0; i < charPositions.length; i++) {
+                    const charInfo = charPositions[i];
+                    code += `  {\n`;
+                    code += `    int pos = (${charInfo.position} - offset) % 16;\n`;
+                    code += `    if (pos < 0) pos += 16;\n`;
+                    code += `    lcd.setCursor(pos, ${row});\n`;
+                    code += `    lcd.write(byte(${charInfo.charIndex}));\n`;
+                    code += `  }\n`;
+                }
+                code += `  \n`;
+            }
+        }
+        
+        code += '  offset++;\n';
+        code += '  if (offset >= 16) offset = 0; // Reset for continuous loop\n';
+        code += '  delay(300); // Animation speed\n';
+        code += '}\n';
+    } else {
+        // Generate static display code
+        code += 'void loop() {\n';
+        code += '  lcd.clear();\n';
+        
+        // Display the content using setCursor for each character
+        for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 16; col++) {
+                if (displayContent[row][col] !== null) {
+                    // This is a custom character
+                    code += `  lcd.setCursor(${col}, ${row});\n`;
+                    code += `  lcd.write(byte(${displayContent[row][col]}));\n`;
+                }
+                // Empty cells are skipped (they will appear as spaces)
+            }
+        }
+        
+        code += '  delay(2000);\n';
+        code += '}\n';
     }
-    
-    code += '  delay(2000);\n';
-    code += '}';
     
     codeOutput.value = code;
 }

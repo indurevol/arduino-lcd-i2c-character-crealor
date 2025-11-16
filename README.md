@@ -20,11 +20,16 @@ A web-based tool for creating custom characters for 16x2 LCD displays used with 
 - Automatic optimization of character usage (detects and reuses duplicate characters)
 - One-click code copying to clipboard
 - No artificial limits on number of characters in generated code (but hardware limited to 8)
+- Cell copy/paste functionality
+- Bidirectional animation preview with speed control
+- Animation direction selection (left-to-right or right-to-left)
+- Synchronized animation controls between preview and code generation
 
 ## Screenshots
 
 ![Start Screen](start.png)
 ![Result Example](res.jpg)
+![Animation Preview](V2.gif)
 
 ## How to Use
 
@@ -34,10 +39,15 @@ A web-based tool for creating custom characters for 16x2 LCD displays used with 
 4. Use the 5x8 grid editor to create your custom character:
    - Click or drag to toggle pixels on/off
    - Changes are automatically saved and code is generated in real-time
-5. Switch between I2C and basic transmission modes as needed
-6. Choose between hexadecimal or binary code format
-7. Click "Copy Code" to copy the generated Arduino code to your clipboard
-8. Paste the code into your Arduino IDE project
+5. Use the copy/paste buttons to duplicate cell designs
+6. Control animation preview with the right-side controls:
+   - Set animation speed with the slider
+   - Choose direction (left or right) with the dropdown
+   - Play/stop the animation preview
+7. Switch between I2C and basic transmission modes as needed
+8. Choose between hexadecimal or binary code format
+9. Click "Copy Code" to copy the generated Arduino code to your clipboard
+10. Paste the code into your Arduino IDE project
 
 ## Arduino Code Features
 
@@ -46,6 +56,7 @@ The generated code includes:
 - Efficient character creation using `lcd.createChar()`
 - Automatic detection and optimization of duplicate characters
 - Use of `lcd.setCursor()` and `lcd.write()` for precise character placement
+- Optional scrolling text animation with configurable direction and speed
 
 ## GitHub Repository
 
