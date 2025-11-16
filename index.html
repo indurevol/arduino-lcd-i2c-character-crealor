@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCD Character Creator for Arduino</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LCD Character Creator for Arduino</h1>
+            <p>Create custom characters for 16x2 LCD displays</p>
+        </header>
+
+        <main>
+            <div class="warning-message">
+                <p><strong>WARNING:</strong> LCD displays support a maximum of 8 custom characters. The generator will create code for all characters, but only the first 8 will work on actual hardware.</p>
+            </div>
+
+            <div class="display-section">
+                <h2>LCD Display Simulator (16x2)</h2>
+                <div class="lcd-display">
+                    <div class="lcd-row">
+                        <div class="lcd-cell" data-row="0" data-col="0">
+                            <div class="cell-grid" id="cell-grid-0-0"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="1">
+                            <div class="cell-grid" id="cell-grid-0-1"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="2">
+                            <div class="cell-grid" id="cell-grid-0-2"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="3">
+                            <div class="cell-grid" id="cell-grid-0-3"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="4">
+                            <div class="cell-grid" id="cell-grid-0-4"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="5">
+                            <div class="cell-grid" id="cell-grid-0-5"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="6">
+                            <div class="cell-grid" id="cell-grid-0-6"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="7">
+                            <div class="cell-grid" id="cell-grid-0-7"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="8">
+                            <div class="cell-grid" id="cell-grid-0-8"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="9">
+                            <div class="cell-grid" id="cell-grid-0-9"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="10">
+                            <div class="cell-grid" id="cell-grid-0-10"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="11">
+                            <div class="cell-grid" id="cell-grid-0-11"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="12">
+                            <div class="cell-grid" id="cell-grid-0-12"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="13">
+                            <div class="cell-grid" id="cell-grid-0-13"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="14">
+                            <div class="cell-grid" id="cell-grid-0-14"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="0" data-col="15">
+                            <div class="cell-grid" id="cell-grid-0-15"></div>
+                        </div>
+                    </div>
+                    <div class="lcd-row">
+                        <div class="lcd-cell" data-row="1" data-col="0">
+                            <div class="cell-grid" id="cell-grid-1-0"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="1">
+                            <div class="cell-grid" id="cell-grid-1-1"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="2">
+                            <div class="cell-grid" id="cell-grid-1-2"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="3">
+                            <div class="cell-grid" id="cell-grid-1-3"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="4">
+                            <div class="cell-grid" id="cell-grid-1-4"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="5">
+                            <div class="cell-grid" id="cell-grid-1-5"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="6">
+                            <div class="cell-grid" id="cell-grid-1-6"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="7">
+                            <div class="cell-grid" id="cell-grid-1-7"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="8">
+                            <div class="cell-grid" id="cell-grid-1-8"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="9">
+                            <div class="cell-grid" id="cell-grid-1-9"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="10">
+                            <div class="cell-grid" id="cell-grid-1-10"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="11">
+                            <div class="cell-grid" id="cell-grid-1-11"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="12">
+                            <div class="cell-grid" id="cell-grid-1-12"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="13">
+                            <div class="cell-grid" id="cell-grid-1-13"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="14">
+                            <div class="cell-grid" id="cell-grid-1-14"></div>
+                        </div>
+                        <div class="lcd-cell" data-row="1" data-col="15">
+                            <div class="cell-grid" id="cell-grid-1-15"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="display-info">
+                    <p>Click on any cell above to edit its 5x8 character grid</p>
+                </div>
+                <div class="button-group" style="margin-top: 15px; justify-content: center;">
+                    <button id="reset-display-btn">Reset Display</button>
+                </div>
+            </div>
+
+            <div class="editor-section">
+                <div class="character-grid-container">
+                    <h2>Character Editor</h2>
+                    <div id="character-grid" class="character-grid"></div>
+                    <div class="grid-info">
+                        <span>Click or drag to toggle pixels | Active cells: <span id="active-count">0</span>/40</span>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="char-select">Current Cell (Row: <span id="current-row">0</span>, Col: <span id="current-col">0</span>):</label>
+                        <div class="button-group">
+                            <button id="clear-btn">Clear</button>
+                        </div>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h3>Instructions:</h3>
+                        <ul>
+                            <li>Click on any cell in the LCD display above to edit it</li>
+                            <li>Each cell contains a 5x8 character grid</li>
+                            <li>Click or drag to toggle pixels in the editor</li>
+                            <li>Changes are automatically saved and code is generated</li>
+                            <li><strong>WARNING: LCD displays support maximum 8 custom characters</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-section">
+                <h2>Arduino Code Generator</h2>
+                <div class="transmission-options">
+                    <label>
+                        <input type="radio" name="transmission" value="i2c" checked> I2C Transmission
+                    </label>
+                    <label>
+                        <input type="radio" name="transmission" value="basic"> Basic Transmission
+                    </label>
+                </div>
+                
+                <div class="format-options">
+                    <label>
+                        <input type="radio" name="format" value="hex" checked> Hexadecimal Format
+                    </label>
+                    <label>
+                        <input type="radio" name="format" value="bin"> Binary Format
+                    </label>
+                </div>
+                
+                <div class="code-output">
+                    <textarea id="code-output" readonly></textarea>
+                    <button id="copy-code-btn">Copy Code</button>
+                </div>
+                
+                <div class="warning-message" style="margin-top: 15px;">
+                    <p><strong>WARNING:</strong> LCD displays support a maximum of 8 custom characters. The generator creates code for all characters, but only the first 8 will work on actual hardware.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Created for Arduino LCD displays | Compatible with LiquidCrystal and LiquidCrystal_I2C libraries</p>
+            <p>Author: INDUREVOL | <a href="https://github.com/indurevol" target="_blank">GitHub Repository</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
