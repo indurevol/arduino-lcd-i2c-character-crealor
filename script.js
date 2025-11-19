@@ -471,7 +471,7 @@ function generateCode() {
     const format = document.querySelector('input[name="format"]:checked').value;
     const generateScrolling = scrollingCheckbox.checked;
     const applyAnimation = applyAnimationCheckbox.checked;
-    const animationDir = codeAnimationDirection.value; // This should be correct
+    const animationDir = codeAnimationDirection.value;
     const animationSpeedValue = parseInt(codeAnimationSpeed.value);
     
     let code = '';
@@ -488,6 +488,13 @@ function generateCode() {
         code += '// Initialize the library with the interface pins\n';
         code += '// RS, Enable, D4, D5, D6, D7 pins\n';
         code += 'LiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\n';
+    }
+    
+    // Add buffer arrays for smooth animation if scrolling is enabled
+    if (generateScrolling && applyAnimation) {
+        code += '// Buffers for storing previous screen state\n';
+        code += 'byte prevLine0[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};\n';
+        code += 'byte prevLine1[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};\n\n';
     }
     
     code += 'void setup() {\n';
@@ -578,10 +585,96 @@ function generateCode() {
         }
     }
     
-    code += '}\n\n';
+    // Add updateLine function for smooth animation if scrolling is enabled
+    if (generateScrolling && applyAnimation) {
+        code += '}\n\n';
+        code += '// Function to update only changed characters\n';
+        code += 'void updateLine(int line, byte newContent[16]) {\n';
+        code += '  byte* prevContent = (line == 0) ? prevLine0 : prevLine1;\n';
+        code += '  \n';
+        code += '  for (int i = 0; i < 16; i++) {\n';
+        code += '    if (newContent[i] != prevContent[i]) {\n';
+        code += '      lcd.setCursor(i, line);\n';
+        code += '      if (newContent[i] == 0xFF) {\n';
+        code += '        lcd.print(" "); // Space for clearing\n';
+        code += '      } else {\n';
+        code += '        lcd.write(newContent[i]);\n';
+        code += '      }\n';
+        code += '      prevContent[i] = newContent[i];\n';
+        code += '    }\n';
+        code += '  }\n';
+        code += '}\n';
+    } else {
+        code += '}\n';
+    }
+    
+    code += '\n';
     
     if (generateScrolling && applyAnimation) {
-        // Generate continuous scrolling animation code with direction and speed
+        // Generate smooth scrolling animation code with direction and speed
+        code += 'void loop() {\n';
+        code += '  static int offset = 0;\n';
+        code += '  byte currentLine0[16];\n';
+        code += '  byte currentLine1[16];\n';
+        code += '  \n';
+        code += '  // Initialize buffers with spaces\n';
+        code += '  for (int i = 0; i < 16; i++) {\n';
+        code += '    currentLine0[i] = 0xFF; // 0xFF means space\n';
+        code += '    currentLine1[i] = 0xFF;\n';
+        code += '  }\n';
+        code += '  \n';
+        
+        // Process each row for continuous scrolling
+        for (let row = 0; row < 2; row++) {
+            code += `  // Fill buffer for line ${row + 1}\n`;
+            // Create an array of character positions for this line
+            let charPositions = [];
+            for (let col = 0; col < 16; col++) {
+                if (displayContent[row][col] !== null) {
+                    charPositions.push({
+                        position: col,
+                        charIndex: displayContent[row][col]
+                    });
+                }
+            }
+            
+            if (charPositions.length > 0) {
+                code += `  int positions${row}[${charPositions.length}] = {`;
+                for (let i = 0; i < charPositions.length; i++) {
+                    code += `${charPositions[i].position}${i < charPositions.length - 1 ? ', ' : ''}`;
+                }
+                code += `};\n`;
+                
+                code += `  byte chars${row}[${charPositions.length}] = {`;
+                for (let i = 0; i < charPositions.length; i++) {
+                    code += `${charPositions[i].charIndex}${i < charPositions.length - 1 ? ', ' : ''}`;
+                }
+                code += `};\n`;
+                
+                code += `  \n`;
+                code += `  for (int i = 0; i < ${charPositions.length}; i++) {\n`;
+                if (animationDir === 'left') {
+                    code += `    int pos = (positions${row}[i] - offset) % 16;\n`;
+                } else {
+                    code += `    int pos = (positions${row}[i] + offset) % 16;\n`;
+                }
+                code += `    if (pos < 0) pos += 16;\n`;
+                code += `    currentLine${row}[pos] = chars${row}[i];\n`;
+                code += `  }\n`;
+                code += `  \n`;
+            }
+        }
+        
+        code += '  // Update only changed characters\n';
+        code += '  updateLine(0, currentLine0);\n';
+        code += '  updateLine(1, currentLine1);\n';
+        code += '  \n';
+        code += '  offset++;\n';
+        code += '  if (offset >= 16) offset = 0;\n';
+        code += `  delay(${animationSpeedValue}); // Animation speed\n`;
+        code += '}\n';
+    } else if (generateScrolling) {
+        // Generate continuous scrolling animation code (default direction and speed)
         code += 'void loop() {\n';
         code += '  // Continuous scrolling text animation\n';
         code += '  static int offset = 0;\n';
@@ -612,47 +705,6 @@ function generateCode() {
                     } else {
                         code += `    int pos = (${charInfo.position} + offset) % 16;\n`;
                     }
-                    code += `    if (pos < 0) pos += 16;\n`;
-                    code += `    lcd.setCursor(pos, ${row});\n`;
-                    code += `    lcd.write(byte(${charInfo.charIndex}));\n`;
-                    code += `  }\n`;
-                }
-                code += `  \n`;
-            }
-        }
-        
-        code += '  offset++;\n';
-        code += '  if (offset >= 16) offset = 0; // Reset for continuous loop\n';
-        code += `  delay(${animationSpeedValue}); // Animation speed\n`;
-        code += '}\n';
-    } else if (generateScrolling) {
-        // Generate continuous scrolling animation code (default direction and speed)
-        code += 'void loop() {\n';
-        code += '  // Continuous scrolling text animation\n';
-        code += '  static int offset = 0;\n';
-        code += '  lcd.clear();\n';
-        code += '  \n';
-        
-        // Process each row for continuous scrolling
-        for (let row = 0; row < 2; row++) {
-            code += `  // Display content for line ${row + 1}\n`;
-            // Create an array of character positions for this line
-            let charPositions = [];
-            for (let col = 0; col < 16; col++) {
-                if (displayContent[row][col] !== null) {
-                    charPositions.push({
-                        position: col,
-                        charIndex: displayContent[row][col]
-                    });
-                }
-            }
-            
-            if (charPositions.length > 0) {
-                code += `  // Line ${row + 1} characters\n`;
-                for (let i = 0; i < charPositions.length; i++) {
-                    const charInfo = charPositions[i];
-                    code += `  {\n`;
-                    code += `    int pos = (${charInfo.position} - offset) % 16;\n`;
                     code += `    if (pos < 0) pos += 16;\n`;
                     code += `    lcd.setCursor(pos, ${row});\n`;
                     code += `    lcd.write(byte(${charInfo.charIndex}));\n`;
